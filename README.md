@@ -33,6 +33,7 @@ curl -sS -X POST http://127.0.0.1:8765/ -H 'Content-Type: application/json' \
 | `KALI_MCP_HOST` / `KALI_MCP_PORT` | Bind address (default `0.0.0.0:8765`) |
 | `KALI_MCP_EXEC_ENABLED` | `1` (default) — if `0` or set `KALI_MCP_EXEC_DISABLED=1`, nmap/gvm/exec and `run_shell` are off |
 | `KALI_MCP_SHELL_DISABLED` | set to `1` to hide the **`run_shell`** tool only (keeps nmap, gvm, `kali_nethunter_exec` when exec is on) |
+| `KALI_MCP_KALI_FEATURES_DISABLED` | set to `1` to hide the extra Kali helpers (`searchsploit`, `resolve_dns`, `network_status`, `ping_host`, `http_head`) |
 | `KALI_MCP_SU` / `KALI_MCP_SU_PATH` | NetHunter: path to `su` |
 | `KALI_MCP_CHROOT_SHIMS` | NetHunter: e.g. `bootkali kali nethunter` |
 | `KALI_MCP_GMP_HOST` / `KALI_MCP_GMP_PORT` / `KALI_MCP_GMP_CAFILE` / `KALI_MCP_GMP_PASSWORD` | defaults for `gvm_cli` |
@@ -44,6 +45,7 @@ Use the badge at the top (or: **Code → Open in… → Codespace** on [github.c
 ## Tools
 
 - **`run_shell`**: for LLM-driven one-liners (same engine as `kali_nethunter_exec`: desktop = `bash -lc`, NetHunter = `su` + chroot shims). Block lists stop obvious interactive/TUI use (`msfconsole`, bare `sh`/`zsh`/`bash` as a shell, `ssh `, `vim `, etc.). Pipelines (`|`, `&&`) on one line are allowed. Disable the tool (keep other exec tools) with `KALI_MCP_SHELL_DISABLED=1`.
+- **Kali helpers (argv-based on desktop, no shell; NetHunter uses a quoted chroot line):** **`searchsploit`** (`-j` JSON, validated query), **`resolve_dns`** (`dig +short`), **`network_status`** (`ip -br a`, `ip route`, `ss -tuln`), **`ping_host`** (ICMP, count 1–10), **`http_head`** (curl response headers, http(s) URLs only, no `user:pass@`). These share `KALI_MCP_KALI_FEATURES_DISABLED=1` to turn off as a group.
 
 ## Security
 

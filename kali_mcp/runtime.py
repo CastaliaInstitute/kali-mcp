@@ -1,5 +1,6 @@
 import os
 import re
+import shlex
 import shutil
 import subprocess
 from dataclasses import dataclass
@@ -106,6 +107,48 @@ def run_kali_line(line: str, timeout_sec: int, s: Settings) -> Outcome:
     if s.profile == Profile.nethunter:
         return _run_nethunter(line, timeout_sec, s)
     return _run_direct(line, timeout_sec)
+
+
+def run_kali_argv(
+    argv: list[str],
+    timeout_sec: int,
+    s: Settings,
+    *,
+    tag: str = "argv",
+) -> Outcome:
+    """
+    No shell. Desktop: subprocess(argv). NetHunter: chroot one-liner via shlex.join (only use with trusted argv).
+    """
+    if not argv or not (argv[0] or "").strip():
+        return Outcome(False, f"{tag}: empty command")
+    t = min(max(3, timeout_sec), 600)
+    if s.profile == Profile.nethunter:
+        line = shlex.join(argv)
+        return _run_nethunter(line, t, s)
+    return _run_argv_list(argv, t, tag=tag)
+
+
+def _run_argv_list(argv: list[str], timeout_sec: int, tag: str) -> Outcome:
+    t = min(max(3, timeout_sec), 600)
+    try:
+        p = subprocess.run(
+            argv,
+            capture_output=True,
+            text=True,
+            timeout=t,
+        )
+    except FileNotFoundError as e:
+        return Outcome(False, f"{tag}: not found: {argv[0]} ({e})")
+    except OSError as e:
+        return Outcome(False, f"{tag}: {e}")
+    except subprocess.TimeoutExpired as e:
+        return Outcome(False, f"{tag} (timeout {t}s): {e}")
+    out = p.stdout or ""
+    if p.stderr:
+        out = (out + "\n" if out else "") + p.stderr
+    if len(out) > MAX_OUTPUT:
+        out = out[: MAX_OUTPUT - 32] + "\n…(output truncated)…\n"
+    return Outcome(p.returncode == 0, f"[{tag}] exit={p.returncode}\n{out}")
 
 
 def gvm_cli_line(

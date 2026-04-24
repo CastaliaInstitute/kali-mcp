@@ -10,6 +10,13 @@ import subprocess
 from typing import Any
 
 from kali_mcp.config import Profile, Settings, load_settings
+from kali_mcp.kali_feature_tools import (
+    tool_http_head,
+    tool_network_status,
+    tool_ping_host,
+    tool_resolve_dns,
+    tool_searchsploit,
+)
 from kali_mcp.nmap_profiles import NMAP_ALL, to_command
 from kali_mcp.runtime import Outcome, gvm_cli_line, is_safe_abs_path, is_safe_host, run_kali_line
 from kali_mcp.safety import is_gmp_readonly_get_request, is_safe_nmap_token, is_semi_interactive_tty_request
@@ -291,6 +298,28 @@ def call_tool(name: str, raw: Any) -> dict:
             )
         o = _run_arbitrary_command(a, "run_shell", response_header=True)
         return mcp_text(o.text) if o.ok else mcp_err(o.text)
+    if name in (
+        "searchsploit",
+        "resolve_dns",
+        "network_status",
+        "ping_host",
+        "http_head",
+    ):
+        if not _SETTINGS.kali_feature_tools_enabled:
+            return mcp_err(
+                "Kali feature tools are disabled (KALI_MCP_KALI_FEATURES_DISABLED=1 or exec off).",
+            )
+        if name == "searchsploit":
+            o = tool_searchsploit(a, _SETTINGS)
+        elif name == "resolve_dns":
+            o = tool_resolve_dns(a, _SETTINGS)
+        elif name == "network_status":
+            o = tool_network_status(_SETTINGS)
+        elif name == "ping_host":
+            o = tool_ping_host(a, _SETTINGS)
+        else:
+            o = tool_http_head(a, _SETTINGS)
+        return mcp_text(o.text) if o.ok else mcp_err(o.text)
     return mcp_err(f"unknown tool: {name}")
 
 
@@ -397,4 +426,75 @@ def tool_catalog_for_settings(s: Settings) -> list[dict[str, Any]]:
                 },
             },
         ]
+    if s.kali_feature_tools_enabled:
+        tools += _kali_feature_tool_definitions()
     return tools
+
+
+def _kali_feature_tool_definitions() -> list[dict[str, Any]]:
+    return [
+        {
+            "name": "searchsploit",
+            "description": "Exploit-DB: searchsploit -j (JSON). Query is strictly validated. Requires exploitdb / searchsploit in PATH.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string", "description": "e.g. 'openssh 8' or 'CVE-2020-1234'"},
+                    "timeout_sec": {"type": "integer"},
+                },
+                "required": ["query"],
+            },
+        },
+        {
+            "name": "resolve_dns",
+            "description": "DNS lookup via dig +short. Types: A, AAAA, MX, NS, TXT, CNAME, etc.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string", "description": "hostname or IP"},
+                    "type": {
+                        "type": "string",
+                        "description": "Record type (default A)",
+                    },
+                    "timeout_sec": {"type": "integer"},
+                },
+                "required": ["name"],
+            },
+        },
+        {
+            "name": "network_status",
+            "description": "Read-only local network snapshot: ip -br a, ip route, ss -tuln (iproute2 + iproute2 ss).",
+            "inputSchema": {"type": "object", "properties": {}},
+        },
+        {
+            "name": "ping_host",
+            "description": "ICMP ping (Linux: ping -c N -W 2). count 1–10. Authorized targets only.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "host": {"type": "string"},
+                    "count": {
+                        "type": "integer",
+                        "description": "Default 3, max 10",
+                    },
+                    "timeout_sec": {"type": "integer"},
+                },
+                "required": ["host"],
+            },
+        },
+        {
+            "name": "http_head",
+            "description": "HTTP/HTTPS response headers (curl -I -L). No user:pass in URL. Use for your own or allowed sites only.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "description": "https://host/… or http:// (max 2k)",
+                    },
+                    "timeout_sec": {"type": "integer"},
+                },
+                "required": ["url"],
+            },
+        },
+    ]
