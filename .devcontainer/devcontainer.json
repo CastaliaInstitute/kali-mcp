@@ -5,7 +5,7 @@
 	"features": {},
 	"onCreateCommand": "apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ca-certificates curl iproute2 python3-pip python3-venv nmap nmap-common network-manager",
 	"postCreateCommand": "python3 -m venv .venv && . .venv/bin/activate && pip install -U pip setuptools wheel && pip install -e .",
-	"postStartCommand": "echo 'kali-mcp: run  . .venv/bin/activate && kali-mcp  (or: python -m kali_mcp)  then open port 8765.'",
+	"postStartCommand": "echo 'kali-mcp: source .venv/bin/activate && kali-mcp  (port 8765, bound in containerEnv).'",
 	"portsAttributes": {
 		"8765": { "label": "kali-mcp HTTP", "onAutoForward": "notify" }
 	},

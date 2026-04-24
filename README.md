@@ -38,7 +38,7 @@ curl -sS -X POST http://127.0.0.1:8765/ -H 'Content-Type: application/json' \
 
 ## GitHub Codespaces
 
-Open this repo in a Codespace: the **devcontainer** uses **Kali rolling** and installs `nmap`, `gvm-cli`, `python3-venv`, then `pip install -e .`. Port **8765** is forwarded for `kali-mcp`.
+Use the badge at the top (or: **Code → Open in… → Codespace** on [github.com/CastaliaInstitute/kali-mcp](https://github.com/CastaliaInstitute/kali-mcp)). The org must have **GitHub Codespaces** enabled (Org **Settings → Codespaces**). The **devcontainer** is **Kali rolling**: installs `nmap`, `NetworkManager` (`nmcli` for `wifi_scan`), and `python3-venv`, then `pip install -e .` on create. Port **8765** auto-forwards; run `kali-mcp` after the container finishes.
 
 ## Security
 
