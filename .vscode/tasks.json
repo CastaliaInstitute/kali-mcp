@@ -1,0 +1,18 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "kali-mcp: run server (8765)",
+			"type": "shell",
+			"command": "bash -lc 'test -d .venv && . .venv/bin/activate; export KALI_MCP_HOST=0.0.0.0 KALI_MCP_PORT=8765; exec kali-mcp'",
+			"options": { "cwd": "${workspaceFolder}" }
+		},
+		{
+			"label": "kali-mcp: test JSON-RPC (Anubis-style smoke)",
+			"type": "shell",
+			"command": "bash -lc 'test -d .venv && . .venv/bin/activate; KALI_MCP_TEST_URL=${KALI_MCP_TEST_URL:-http://127.0.0.1:8765/} python3 scripts/test_mcp_jsonrpc.py'",
+			"options": { "cwd": "${workspaceFolder}" },
+			"group": { "kind": "test", "isDefault": true }
+		}
+	]
+}

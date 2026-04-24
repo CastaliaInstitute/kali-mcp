@@ -2,11 +2,23 @@
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/CastaliaInstitute/kali-mcp?quickstart=1)
 
-HTTP **JSON-RPC** MCP server aligned with the **Anubis** Android client (`nethunter-gemini-mcp` / `McpClient`): `initialize`, `tools/list`, `tools/call`, headers `Mcp-Protocol-Version` / `Mcp-Session-Id`.
+**One MCP, two ways to use it (same `tools/*` contract, different “where the server runs”):**
 
-Use the same tool names on **Kali desktop** (default) and **NetHunter** (`KALI_MCP_PROFILE=nethunter` — `su` + `bootkali` / `kali` / `nethunter` shims).
+1. **Anubis (Android app)** — Anubis stays the **Gemini client and optional built-in** tools. Point **Settings → MCP base URL** at a running kali-mcp. Anubis still loads **remote** tools from this server; built-in (e.g. Android `wifi_scan`) is unchanged. Same JSON-RPC as `McpClient` (`initialize`, `tools/list`, `tools/call`, `Mcp-Protocol-Version` / `Mcp-Session-Id`).
 
-**Host this repository** under the Castalia Institute org (e.g. `github.com/castaliainstitute/kali-mcp`) and point Anubis “MCP URL” at `http://<host>:8765/`.
+2. **GitHub Codespace (Kali devcontainer here)** — Run the **same** `kali-mcp` process in the Kali container for local testing: `./scripts/test-mcp-like-anubis.sh`, VS Code **Tasks** (`kali-mcp: run server` / `test JSON-RPC`), and forwarded port **8765**. The Codespaces “Ports” tab shows a public HTTPS URL; you can use that in Anubis on a real phone **only if** the device can reach the internet and that host (treat it like a dev server URL).
+
+3. **Any Kali/VM/NetHunter** — `pip install -e .` and `kali-mcp` (default `0.0.0.0:8765`).
+
+`KALI_MCP_PROFILE=desktop` on full Kali; `nethunter` = `su` + chroot shims (`bootkali` / `kali` / `nethunter`).
+
+| Where kali-mcp runs | How you connect Anubis (or curl) |
+|--------------------|----------------------------------|
+| This repo in **Codespace** | Forward **8765**; test from the Codespace terminal with `http://127.0.0.1:8765/`; for a phone, use the forwarded public URL in Settings if reachable. |
+| **Kali/VM** on your LAN | `http://<machine-ip>:8765/` (same network as the phone) |
+| **USB to dev machine** | `adb reverse tcp:8765 tcp:8765` and `http://127.0.0.1:8765/` in Anubis (localhost is the dev machine) |
+
+**kali-mcp does not replace** the Anubis app — it is the **deployable MCP process** for Kali feature tools so tests and the phone can share one server implementation.
 
 ## Test (same wire format as Anubis)
 
@@ -51,9 +63,11 @@ curl -sS -X POST http://127.0.0.1:8765/ -H 'Content-Type: application/json' \
 | `KALI_MCP_CHROOT_SHIMS` | NetHunter: e.g. `bootkali kali nethunter` |
 | `KALI_MCP_GMP_HOST` / `KALI_MCP_GMP_PORT` / `KALI_MCP_GMP_CAFILE` / `KALI_MCP_GMP_PASSWORD` | defaults for `gvm_cli` |
 
-## GitHub Codespaces
+## GitHub Codespaces (Kali) — test the same MCP as Anubis
 
-Use the badge at the top (or: **Code → Open in… → Codespace** on [github.com/CastaliaInstitute/kali-mcp](https://github.com/CastaliaInstitute/kali-mcp)). The org must have **GitHub Codespaces** enabled (Org **Settings → Codespaces**). The **devcontainer** is **Kali rolling**: installs `nmap`, `NetworkManager` (`nmcli` for `wifi_scan`), and `python3-venv`, then `pip install -e .` on create. Port **8765** auto-forwards; run `kali-mcp` after the container finishes.
+Open the repo in a **Codespace** (badge or **Code → Codespace** on [github.com/CastaliaInstitute/kali-mcp](https://github.com/CastaliaInstitute/kali-mcp)). The **devcontainer** is **Kali rolling**: installs `nmap`, `iproute2` (`ip`, `ss`), `dnsutils` (`dig`), optional `exploitdb` (for `searchsploit`), `network-manager` (`nmcli`), then `pip install -e .` on create.
+
+After the container is ready: `source .venv/bin/activate && kali-mcp`, or **Run Task → kali-mcp: run server (8765)**. Use **Run Task → kali-mcp: test JSON-RPC** only while the server is up (or run the smoke script). Port **8765** is forwarded; use the **ports** view for the public URL to paste into Anubis in dev.
 
 ## Tools
 
