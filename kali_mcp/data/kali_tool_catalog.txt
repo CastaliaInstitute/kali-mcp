@@ -1,0 +1,33 @@
+# Shared with Anubis (kali_nethunter_list_tools). Extend freely.
+# minimal + common Kali tools
+nmap
+msfvenom
+msfconsole
+sqlmap
+aircrack-ng
+hashcat
+hydra
+gvm-cli
+nikto
+wireshark
+tcpdump
+tcpflow
+nuclei
+rustscan
+masscan
+gobuster
+ffuf
+wapiti
+zaproxy
+burpsuite
+gdb
+ghidra
+radare2
+volatility3
+smbclient
+nxc
+crackmapexec
+netexec
+recon-ng
+setoolkit
+exploitdb

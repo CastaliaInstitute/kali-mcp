@@ -1,0 +1,23 @@
+{
+	"name": "Kali (kali-mcp)",
+	"image": "kalilinux/kali-rolling",
+	"remoteUser": "root",
+	"features": {},
+	"onCreateCommand": "apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ca-certificates curl iproute2 python3-pip python3-venv nmap nmap-common network-manager",
+	"postCreateCommand": "python3 -m venv .venv && . .venv/bin/activate && pip install -U pip setuptools wheel && pip install -e .",
+	"postStartCommand": "echo 'kali-mcp: run  . .venv/bin/activate && kali-mcp  (or: python -m kali_mcp)  then open port 8765.'",
+	"portsAttributes": {
+		"8765": { "label": "kali-mcp HTTP", "onAutoForward": "notify" }
+	},
+	"forwardPorts": [8765],
+	"customizations": {
+		"vscode": {
+			"settings": { "python.defaultInterpreterPath": "${containerWorkspaceFolder}/.venv/bin/python" }
+		}
+	},
+	"containerEnv": {
+		"KALI_MCP_PROFILE": "desktop",
+		"KALI_MCP_HOST": "0.0.0.0",
+		"KALI_MCP_PORT": "8765"
+	}
+}
