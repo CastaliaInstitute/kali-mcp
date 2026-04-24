@@ -1,0 +1,12 @@
+# Local / VM: docker compose up --build
+# Anubis: set MCP URL to http://<host>:8765/ (same as bare metal)
+services:
+  kali-mcp:
+    build: .
+    image: kali-mcp:local
+    ports:
+      - "8765:8765"
+    environment:
+      KALI_MCP_HOST: "0.0.0.0"
+      KALI_MCP_PORT: "8765"
+      KALI_MCP_PROFILE: desktop

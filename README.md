@@ -33,6 +33,21 @@ Exercises `initialize`, `tools/list`, and `tools/call` for `searchsploit`, `reso
 
 **Anubis (device)**: in the **nethunter-gemini-mcp (Anubis)** repo, `scripts/ask-kali-mcp-prompts.sh` sends user messages that should trigger the LLM to call the tools above. Set the app **MCP Base URL** to your kali-mcp, tap **Refresh MCP**; for USB to a host on port 8765: `adb reverse tcp:8765 tcp:8765` and `http://127.0.0.1:8765/`; emulators often use `http://10.0.2.2:8765/`.
 
+## Container deploy (GHCR + Docker)
+
+On every push to `main` (and **workflow dispatch**), GitHub Actions builds and pushes:
+
+`ghcr.io/<lowercase-owner>/kali-mcp:latest` and `:sha-<commit>`
+
+**Pull and run** (package may be private to the org until you make it public: **Package settings → Change visibility**):
+
+```bash
+docker pull ghcr.io/castaliainstitute/kali-mcp:latest
+docker run --rm -p 8765:8765 ghcr.io/castaliainstitute/kali-mcp:latest
+```
+
+**Compose** (from this repo): `docker compose up --build` — same port **8765** as everywhere else (Anubis MCP URL `http://<host>:8765/`).
+
 ## Run (local or VM)
 
 ```bash

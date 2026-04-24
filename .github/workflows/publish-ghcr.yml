@@ -1,0 +1,52 @@
+# Build and push to GitHub Container Registry: ghcr.io/<owner>/kali-mcp
+# Pull:  docker pull ghcr.io/castaliainstitute/kali-mcp:latest
+# Run:   docker run --rm -p 8765:8765 ghcr.io/castaliainstitute/kali-mcp:latest
+name: Publish kali-mcp to GHCR
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "Dockerfile"
+      - "kali_mcp/**"
+      - "pyproject.toml"
+      - ".github/workflows/publish-ghcr.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: publish-ghcr-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Image name (lowercase for OCI)
+        id: n
+        run: |
+          r='${{ github.repository }}'
+          echo "image=ghcr.io/${r,,}" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ steps.n.outputs.image }}:latest
+            ${{ steps.n.outputs.image }}:sha-${{ github.sha }}
