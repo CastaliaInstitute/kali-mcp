@@ -31,7 +31,8 @@ curl -sS -X POST http://127.0.0.1:8765/ -H 'Content-Type: application/json' \
 |----------|---------|
 | `KALI_MCP_PROFILE` | `desktop` (default) or `nethunter` |
 | `KALI_MCP_HOST` / `KALI_MCP_PORT` | Bind address (default `0.0.0.0:8765`) |
-| `KALI_MCP_EXEC_ENABLED` | `1` (default) — if `0` or set `KALI_MCP_EXEC_DISABLED=1`, nmap/gvm/exec tools are hidden |
+| `KALI_MCP_EXEC_ENABLED` | `1` (default) — if `0` or set `KALI_MCP_EXEC_DISABLED=1`, nmap/gvm/exec and `run_shell` are off |
+| `KALI_MCP_SHELL_DISABLED` | set to `1` to hide the **`run_shell`** tool only (keeps nmap, gvm, `kali_nethunter_exec` when exec is on) |
 | `KALI_MCP_SU` / `KALI_MCP_SU_PATH` | NetHunter: path to `su` |
 | `KALI_MCP_CHROOT_SHIMS` | NetHunter: e.g. `bootkali kali nethunter` |
 | `KALI_MCP_GMP_HOST` / `KALI_MCP_GMP_PORT` / `KALI_MCP_GMP_CAFILE` / `KALI_MCP_GMP_PASSWORD` | defaults for `gvm_cli` |
@@ -39,6 +40,10 @@ curl -sS -X POST http://127.0.0.1:8765/ -H 'Content-Type: application/json' \
 ## GitHub Codespaces
 
 Use the badge at the top (or: **Code → Open in… → Codespace** on [github.com/CastaliaInstitute/kali-mcp](https://github.com/CastaliaInstitute/kali-mcp)). The org must have **GitHub Codespaces** enabled (Org **Settings → Codespaces**). The **devcontainer** is **Kali rolling**: installs `nmap`, `NetworkManager` (`nmcli` for `wifi_scan`), and `python3-venv`, then `pip install -e .` on create. Port **8765** auto-forwards; run `kali-mcp` after the container finishes.
+
+## Tools
+
+- **`run_shell`**: for LLM-driven one-liners (same engine as `kali_nethunter_exec`: desktop = `bash -lc`, NetHunter = `su` + chroot shims). Block lists stop obvious interactive/TUI use (`msfconsole`, bare `sh`/`zsh`/`bash` as a shell, `ssh `, `vim `, etc.). Pipelines (`|`, `&&`) on one line are allowed. Disable the tool (keep other exec tools) with `KALI_MCP_SHELL_DISABLED=1`.
 
 ## Security
 

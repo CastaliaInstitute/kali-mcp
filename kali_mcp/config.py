@@ -16,6 +16,7 @@ class Settings:
 
     profile: Profile
     exec_enabled: bool
+    shell_enabled: bool
     su_path: str | None
     chroot_shims: tuple[str, ...]
     gmp_username: str
@@ -37,9 +38,11 @@ def load_settings() -> Settings:
         profile = Profile.desktop
     shims = os.environ.get("KALI_MCP_CHROOT_SHIMS", "bootkali kali nethunter")
     su = (os.environ.get("KALI_MCP_SU") or os.environ.get("KALI_MCP_SU_PATH") or "").strip() or None
+    ex = not _b("KALI_MCP_EXEC_DISABLED") and _b("KALI_MCP_EXEC_ENABLED", "1")
     return Settings(
         profile=profile,
-        exec_enabled=not _b("KALI_MCP_EXEC_DISABLED") and _b("KALI_MCP_EXEC_ENABLED", "1"),
+        exec_enabled=ex,
+        shell_enabled=ex and not _b("KALI_MCP_SHELL_DISABLED"),
         su_path=su,
         chroot_shims=tuple(s for s in shims.split() if s),
         gmp_username=(os.environ.get("KALI_MCP_GMP_USER") or os.environ.get("GMP_USER") or "_gvm")

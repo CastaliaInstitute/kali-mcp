@@ -222,17 +222,28 @@ def _gvm(args: dict[str, Any]) -> Outcome:
     return Outcome(o.ok, rpt)
 
 
-def _exec_cmd(args: dict[str, Any]) -> Outcome:
+def _run_arbitrary_command(
+    args: dict[str, Any],
+    tool: str,
+    *,
+    response_header: bool = False,
+) -> Outcome:
+    """Single non-interactive line: bash -lc (desktop) or chroot (nethunter)."""
     s = _SETTINGS
-    if not s.exec_enabled:
-        return Outcome(False, "kali_nethunter_exec: KALI_MCP exec disabled. Set KALI_MCP_EXEC_ENABLED=1")
     c = _str(args, "command")
     if not c:
-        return Outcome(False, "kali_nethunter_exec: required 'command' (string)")
+        return Outcome(False, f"{tool}: required 'command' (string)")
     t = int(_int(args, "timeout_sec", 120))
     if is_semi_interactive_tty_request(c):
-        return Outcome(False, "kali_nethunter_exec: use non-interactive one-liners only (no TUI, shells, ssh).")
-    return run_kali_line(c, t, s)
+        return Outcome(
+            False,
+            f"{tool}: use non-interactive one-liners only (no TUI, login shells, ssh, msfconsole, etc.).",
+        )
+    o = run_kali_line(c, t, s)
+    if not response_header:
+        return o
+    head = f"{tool}  profile={s.profile.value}  exit_ok={o.ok}\n"
+    return Outcome(o.ok, head + o.text)
 
 
 def call_tool(name: str, raw: Any) -> dict:
@@ -267,7 +278,18 @@ def call_tool(name: str, raw: Any) -> dict:
         o = _gvm(a)
         return mcp_text(o.text) if o.ok else mcp_err(o.text)
     if name == "kali_nethunter_exec":
-        o = _exec_cmd(a)
+        if not _SETTINGS.exec_enabled:
+            return mcp_err(
+                "kali_nethunter_exec: KALI_MCP exec disabled. Set KALI_MCP_EXEC_ENABLED=1",
+            )
+        o = _run_arbitrary_command(a, "kali_nethunter_exec", response_header=False)
+        return mcp_text(o.text) if o.ok else mcp_err(o.text)
+    if name == "run_shell":
+        if not _SETTINGS.shell_enabled:
+            return mcp_err(
+                "run_shell: disabled. Set KALI_MCP_EXEC_ENABLED=1 and clear KALI_MCP_SHELL_DISABLED.",
+            )
+        o = _run_arbitrary_command(a, "run_shell", response_header=True)
         return mcp_text(o.text) if o.ok else mcp_err(o.text)
     return mcp_err(f"unknown tool: {name}")
 
@@ -306,6 +328,30 @@ def tool_catalog_for_settings(s: Settings) -> list[dict[str, Any]]:
         },
     ]
     if s.exec_enabled:
+        if s.shell_enabled:
+            tools += [
+                {
+                    "name": "run_shell",
+                    "description": "Run a single non-interactive shell line for the LLM: pipeline and && allowed; "
+                    "executed as bash -lc on Kali desktop or inside the NetHunter chroot when "
+                    "KALI_MCP_PROFILE=nethunter. Blocked: interactive TUIs, login shells, msfconsole, "
+                    "ssh, etc. Expose this server only on trusted networks.",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "command": {
+                                "type": "string",
+                                "description": "One shell line (e.g. 'ls -la /tmp', 'head -5 /etc/os-release')",
+                            },
+                            "timeout_sec": {
+                                "type": "integer",
+                                "description": "Optional; default 120, max 600",
+                            },
+                        },
+                        "required": ["command"],
+                    },
+                },
+            ]
         tools += [
             {
                 "name": "nmap_scan",
