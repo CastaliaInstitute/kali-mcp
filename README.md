@@ -8,6 +8,19 @@ Use the same tool names on **Kali desktop** (default) and **NetHunter** (`KALI_M
 
 **Host this repository** under the Castalia Institute org (e.g. `github.com/castaliainstitute/kali-mcp`) and point Anubis “MCP URL” at `http://<host>:8765/`.
 
+## Test (same wire format as Anubis)
+
+With `kali-mcp` running (default `8765`):
+
+```bash
+./scripts/test-mcp-like-anubis.sh
+# or:  KALI_MCP_TEST_URL=http://127.0.0.1:8765/ python3 scripts/test_mcp_jsonrpc.py
+```
+
+Exercises `initialize`, `tools/list`, and `tools/call` for `searchsploit`, `resolve_dns`, `network_status`, `ping_host`, `http_head`, `run_shell`. A missing `searchsploit` or `ip` binary shows `isError` in the result but still exits 0; use `KALI_MCP_SMOKE_STRICT=1` to fail in that case.
+
+**Anubis (device)**: in the **nethunter-gemini-mcp (Anubis)** repo, `scripts/ask-kali-mcp-prompts.sh` sends user messages that should trigger the LLM to call the tools above. Set the app **MCP Base URL** to your kali-mcp, tap **Refresh MCP**; for USB to a host on port 8765: `adb reverse tcp:8765 tcp:8765` and `http://127.0.0.1:8765/`; emulators often use `http://10.0.2.2:8765/`.
+
 ## Run (local or VM)
 
 ```bash
