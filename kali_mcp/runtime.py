@@ -161,9 +161,14 @@ def gvm_cli_line(
     s: Settings,
 ) -> str:
     """Build one bash line. NetHunter: runuser in chroot. Desktop: gvm-cli in PATH (often run the server as root or gvm)."""
+    tls = (
+        f"tls --hostname {sh_quote(host)} --port {port} --insecure"
+        if s.gmp_tls_insecure
+        else f"tls --hostname {sh_quote(host)} --port {port} --cafile {sh_quote(ca_file)}"
+    )
     inner = (
         f"gvm-cli --gmp-username {sh_quote(gmp_user)} --gmp-password {sh_quote(gmp_password)} "
-        f"tls --hostname {sh_quote(host)} --port {port} --cafile {sh_quote(ca_file)} "
+        f"{tls} "
         f"-X {sh_quote(gmp_xml)} --pretty"
     )
     if s.profile == Profile.nethunter:

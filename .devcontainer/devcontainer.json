@@ -3,9 +3,9 @@
 	"image": "kalilinux/kali-rolling",
 	"remoteUser": "root",
 	"features": {},
-	"onCreateCommand": "bash -c 'set -e; export DEBIAN_FRONTEND=noninteractive; apt-get update; apt-get install -y --no-install-recommends ca-certificates curl iproute2 python3-pip python3-venv nmap nmap-common network-manager dnsutils; apt-get install -y exploitdb || true'",
+	"onCreateCommand": "bash -c 'set -e; export DEBIAN_FRONTEND=noninteractive; apt-get update; apt-get install -y --no-install-recommends ca-certificates curl iproute2 python3-pip python3-venv nmap nmap-common network-manager dnsutils; apt-get install -y gvm-cli || apt-get install -y gvm-tools || true; apt-get install -y exploitdb || true'",
 	"postCreateCommand": "python3 -m venv .venv && . .venv/bin/activate && pip install -U pip setuptools wheel && pip install -e .",
-	"postStartCommand": "test -f .venv/bin/kali-mcp && echo 'kali-mcp: run  source .venv/bin/activate && kali-mcp  (or: Tasks → Run kali-mcp). Port 8765 is forwarded; use the Codespaces public URL in Anubis Settings if the device can reach the internet, or use host USB/adb for local dev.'",
+	"postStartCommand": "test -f .venv/bin/kali-mcp && echo 'kali-mcp:  source .venv/bin/activate && ./scripts/codespace-kali-mcp.sh  (applies .devcontainer/gmp.env for GMP).  Or: kali-mcp.  gvm_info / gvm_cli = Greenbone. Port 8765 is forwarded; see README GVM section.'",
 	"portsAttributes": {
 		"8765": { "label": "kali-mcp HTTP", "onAutoForward": "notify" }
 	},

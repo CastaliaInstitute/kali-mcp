@@ -65,6 +65,14 @@ def main() -> int:
     else:
         print("tools/list: all", len(need), "Kali+shell tools present", file=sys.stderr)
 
+    if "gvm_info" in names:
+        g = post(2, "tools/call", {"name": "gvm_info", "arguments": {}})
+        g0 = (g.get("result") or {}).get("content", [{}])
+        gtxt = (g0[0] or {}).get("text", "") if g0 else ""
+        print("gvm_info:\n", (gtxt or str(g))[:2000], "\n---", file=sys.stderr)
+    else:
+        print("SKIP: gvm_info not in catalog", file=sys.stderr)
+
     calls: list[tuple[str, int, dict]] = [
         ("searchsploit", 10, {"query": "openssh"}),
         ("resolve_dns", 11, {"name": "one.one.one.one", "type": "A"}),

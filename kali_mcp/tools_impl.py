@@ -180,6 +180,22 @@ def _nmap(args: dict[str, Any]) -> Outcome:
     return Outcome(o.ok, rpt)
 
 
+def _gvm_info() -> str:
+    s = _SETTINGS
+    gvmc = shutil.which("gvm-cli")
+    has_ca = bool(s.gmp_cafile) and os.path.isfile(s.gmp_cafile)
+    return (
+        "gvm_info (GMP / Greenbone in kali-mcp)\n"
+        f"  gvm-cli binary: {gvmc or '(not in PATH — in Codespace: apt install gvm-cli; restart shell)'}\n"
+        f"  defaults: host {s.gmp_host} port {s.gmp_port}  user {s.gmp_username}\n"
+        f"  GMP password from env: "
+        f"{'yes (KALI_MCP_GMP_PASSWORD or GMP_PASSWORD); pass gmp_password in gvm_cli to override' if s.gmp_default_password else 'no — set KALI_MCP_GMP_PASSWORD or gmp_password in the tool call'}\n"
+        f"  KALI_MCP_GMP_CAFILE: {s.gmp_cafile}  (file present: {has_ca})\n"
+        f"  KALI_MCP_GMP_TLS_INSECURE: {s.gmp_tls_insecure} — if true, gvm_cli uses `tls --insecure` (no cafile; dev only)\n"
+        "  Next: tools/call gvm_cli with gmp_xml: <get_version/> to verify TLS and credentials."
+    )
+
+
 def _gvm(args: dict[str, Any]) -> Outcome:
     s = _SETTINGS
     if not s.exec_enabled:
@@ -212,13 +228,20 @@ def _gvm(args: dict[str, Any]) -> Outcome:
     if prt < 1 or prt > 65535:
         return Outcome(False, "gvm_cli: port 1–65535")
     ca = _str(args, "cafile") or s.gmp_cafile
-    if not ca:
-        return Outcome(
-            False,
-            "gvm_cli: set cafile (absolute) or KALI_MCP_GMP_CAFILE in the environment.",
-        )
-    if not is_safe_abs_path(ca):
-        return Outcome(False, "gvm_cli: cafile must be an absolute, safe path.")
+    if not s.gmp_tls_insecure:
+        if not ca:
+            return Outcome(
+                False,
+                "gvm_cli: set cafile (absolute) or KALI_MCP_GMP_CAFILE in the environment, "
+                "or set KALI_MCP_GMP_TLS_INSECURE=1 (dev only; no cert verify).",
+            )
+        if not is_safe_abs_path(ca):
+            return Outcome(False, "gvm_cli: cafile must be an absolute, safe path.")
+    else:
+        if ca and not is_safe_abs_path(ca):
+            return Outcome(False, "gvm_cli: cafile must be an absolute, safe path when set.")
+        if not ca:
+            ca = "/dev/null"
     to = int(_int(args, "timeout_sec", 60))
     line = gvm_cli_line(x, u, pw, host, prt, ca, s)
     if is_semi_interactive_tty_request(line):
@@ -281,6 +304,8 @@ def call_tool(name: str, raw: Any) -> dict:
     if name == "nmap_scan":
         o = _nmap(a)
         return mcp_text(o.text) if o.ok else mcp_err(o.text)
+    if name == "gvm_info":
+        return mcp_text(_gvm_info())
     if name == "gvm_cli":
         o = _gvm(a)
         return mcp_text(o.text) if o.ok else mcp_err(o.text)
@@ -338,6 +363,11 @@ def tool_catalog_for_settings(s: Settings) -> list[dict[str, Any]]:
         {
             "name": "device_info",
             "description": "Host uname, profile (desktop / nethunter), and /etc/os-release (server-side kali-mcp).",
+            "inputSchema": {"type": "object", "properties": {}},
+        },
+        {
+            "name": "gvm_info",
+            "description": "GMP/gvmd connection defaults: host, port, user, cafile path, TLS insecure flag, gvm-cli on PATH. No secrets, no network.",
             "inputSchema": {"type": "object", "properties": {}},
         },
         {

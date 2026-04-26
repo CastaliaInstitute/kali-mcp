@@ -25,6 +25,7 @@ class Settings:
     gmp_host: str
     gmp_port: int
     gmp_cafile: str
+    gmp_tls_insecure: bool
 
 
 def _b(name: str, default: str = "0") -> bool:
@@ -57,4 +58,5 @@ def load_settings() -> Settings:
             (os.environ.get("KALI_MCP_GMP_PORT") or "9390").split("#", 1)[0].strip() or "9390"
         ),
         gmp_cafile=(os.environ.get("KALI_MCP_GMP_CAFILE") or "").strip() or "/var/lib/gvm/CA/cacert.pem",
+        gmp_tls_insecure=_b("KALI_MCP_GMP_TLS_INSECURE"),
     )
