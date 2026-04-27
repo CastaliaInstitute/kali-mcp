@@ -2,8 +2,5 @@
 	"workbench.startupEditor": "none",
 	"workbench.tips.enabled": false,
 	"task.allowAutomaticTasks": "on",
-	"chat.mcp.autostart": true,
-	"chat.mcp.autoStart": "newAndOutdated",
-	"chat.mcp.apps.enabled": true,
 	"chat.tools.terminal.enforceTimeoutFromModel": false
 }

@@ -41,6 +41,6 @@ cat <<'EOF' >&2
   * URL (in container):  http://127.0.0.1:8765/
   * In GitHub Codespaces: Ports -> 8765 -> public https://<codespace>-8765.app.github.dev/
   * Log:                 tail -f /tmp/kali-mcp.log
-  * For Copilot MCP:     workspace .vscode/mcp.json (kaliMcpStdio) — use MCP: List Servers in the command palette
+  * Optional Copilot stdio: copy .vscode/mcp.json.example -> .vscode/mcp.json, then MCP: List Servers
 ===============================================================================
 EOF

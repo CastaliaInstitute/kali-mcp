@@ -1,13 +1,3 @@
 {
-  "servers": {
-    "kaliMcpStdio": {
-      "type": "stdio",
-      "command": "${workspaceFolder}/.venv/bin/python",
-      "args": ["-m", "kali_mcp.copilot_stdio_lite"],
-      "env": {
-        "KALI_MCP_PROFILE": "desktop",
-        "KALI_MCP_MAX_TIMEOUT_SEC": "1800"
-      }
-    }
-  }
+  "servers": {}
 }
