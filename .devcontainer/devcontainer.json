@@ -1,6 +1,8 @@
 {
 	"name": "Kali (kali-mcp)",
-	"image": "kalilinux/kali-rolling",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
 	"remoteUser": "root",
 	"hostRequirements": {
 		"cpus": 4,
@@ -9,14 +11,13 @@
 	"features": {
 		"ghcr.io/devcontainers/features/docker-in-docker:2": {
 			"version": "latest",
-			"dockerDashComposeVersion": "v2",
-			"moby": false
+			"dockerDashComposeVersion": "v2"
 		},
 		"ghcr.io/devcontainers/features/github-cli:1": {
 			"version": "latest"
 		}
 	},
-	"onCreateCommand": "bash scripts/install-kali-mcp-prereqs.sh",
+	"onCreateCommand": "bash .devcontainer/restore-kali-os-release.sh && bash scripts/install-kali-mcp-prereqs.sh",
 	"postCreateCommand": "bash .devcontainer/post-create.sh",
 	"postStartCommand": "bash .devcontainer/post-start.sh",
 	"portsAttributes": {
