@@ -44,11 +44,10 @@
 		},
 		{
 			"label": "pentest book: open in editor (content/intro.md)",
-			"detail": "Focuses the Jupyter Book intro in the editor instead of README. Runs on folder open once you trust the workspace; disable via Settings → `task allow automatic tasks` if needed.",
+			"detail": "Focuses the Jupyter Book intro in the editor instead of README. Run this task manually (not on folder open) to avoid competing with Copilot on startup.",
 			"type": "shell",
 			"command": "bash -lc 'exec bash \"${workspaceFolder}/scripts/vscode-open-pentest-book.sh\" \"${workspaceFolder}/pentest-book/content/intro.md\"'",
-			"options": { "cwd": "${workspaceFolder}" },
-			"runOptions": { "runOn": "folderOpen" }
+			"options": { "cwd": "${workspaceFolder}" }
 		},
 		{
 			"label": "pentest book: open Thebe site in system browser (localhost:8788)",

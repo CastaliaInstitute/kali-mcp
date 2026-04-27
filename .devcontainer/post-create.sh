@@ -10,7 +10,8 @@ fi
 # shellcheck source=/dev/null
 . .venv/bin/activate
 pip install -U pip setuptools wheel
-pip install -e '.[copilot]'
+# Base install (stdio_lite + HTTP server). Optional: pip install -e '.[copilot]' for kali_mcp.copilot_stdio (full PyPI mcp SDK).
+pip install -e .
 
 if [[ "${CODESPACES:-false}" == "true" ]] && command -v gh >/dev/null 2>&1; then
   # Codespaces pre-authenticates `gh`; this points git(1) at the same token (HTTPS to github.com).

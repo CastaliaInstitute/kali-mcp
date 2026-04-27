@@ -24,6 +24,7 @@ from kali_mcp.runtime import (
     gvm_runuser_will_apply,
     is_safe_abs_path,
     is_safe_host,
+    max_subprocess_timeout_sec,
     run_kali_line,
 )
 from kali_mcp.safety import is_gmp_readonly_get_request, is_safe_nmap_token, is_semi_interactive_tty_request
@@ -425,7 +426,10 @@ def tool_catalog_for_settings(s: Settings) -> list[dict[str, Any]]:
                             },
                             "timeout_sec": {
                                 "type": "integer",
-                                "description": "Optional; default 120, max 600",
+                                "description": (
+                                    f"Optional; default 120, server cap {max_subprocess_timeout_sec()}s "
+                                    "(set KALI_MCP_MAX_TIMEOUT_SEC)"
+                                ),
                             },
                         },
                         "required": ["command"],

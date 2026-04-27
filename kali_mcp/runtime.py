@@ -14,6 +14,21 @@ MAX_OUTPUT = 256 * 1024
 _HOST_RE = re.compile(r"^[a-zA-Z0-9.\-:_\[\]]{1,253}$")
 
 
+def max_subprocess_timeout_sec() -> int:
+    """
+    Upper bound for `timeout_sec` on subprocess tools (run_shell, nmap, gvm, argv helpers).
+
+    Set **KALI_MCP_MAX_TIMEOUT_SEC** (5–10800, default 600). This does not change Copilot
+    client MCP / chat limits; see README.
+    """
+    raw = (os.environ.get("KALI_MCP_MAX_TIMEOUT_SEC") or "600").split("#", 1)[0].strip()
+    try:
+        v = int(raw, 10)
+    except ValueError:
+        v = 600
+    return min(10800, max(5, v))
+
+
 @dataclass(frozen=True)
 class Outcome:
     ok: bool
@@ -91,7 +106,7 @@ def _gvm_use_runuser_desktop() -> bool:
 
 
 def _run_direct(line: str, timeout_sec: int) -> Outcome:
-    t = min(max(5, timeout_sec), 600)
+    t = min(max(5, timeout_sec), max_subprocess_timeout_sec())
     try:
         p = subprocess.run(
             ["/bin/bash", "-lc", line],
@@ -116,7 +131,7 @@ def _run_nethunter(line: str, timeout_sec: int, s: Settings) -> Outcome:
     su = s.su_path or _find_su()
     if not su:
         return Outcome(False, "kali_nethunter_exec: no su found. Set KALI_MCP_SU for NetHunter profile.")
-    t = min(max(5, timeout_sec), 600)
+    t = min(max(5, timeout_sec), max_subprocess_timeout_sec())
     shims: list[str] = list(s.chroot_shims) or ["bootkali", "kali", "nethunter"]
     last_err: str | None = None
     for sh in shims:
@@ -164,7 +179,7 @@ def run_kali_argv(
     """
     if not argv or not (argv[0] or "").strip():
         return Outcome(False, f"{tag}: empty command")
-    t = min(max(3, timeout_sec), 600)
+    t = min(max(3, timeout_sec), max_subprocess_timeout_sec())
     if s.profile == Profile.nethunter:
         line = shlex.join(argv)
         return _run_nethunter(line, t, s)
@@ -172,7 +187,7 @@ def run_kali_argv(
 
 
 def _run_argv_list(argv: list[str], timeout_sec: int, tag: str) -> Outcome:
-    t = min(max(3, timeout_sec), 600)
+    t = min(max(3, timeout_sec), max_subprocess_timeout_sec())
     try:
         p = subprocess.run(
             argv,
