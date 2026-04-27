@@ -18,7 +18,14 @@ from kali_mcp.kali_feature_tools import (
     tool_searchsploit,
 )
 from kali_mcp.nmap_profiles import NMAP_ALL, to_command
-from kali_mcp.runtime import Outcome, gvm_cli_line, is_safe_abs_path, is_safe_host, run_kali_line
+from kali_mcp.runtime import (
+    Outcome,
+    gvm_cli_line,
+    gvm_runuser_will_apply,
+    is_safe_abs_path,
+    is_safe_host,
+    run_kali_line,
+)
 from kali_mcp.safety import is_gmp_readonly_get_request, is_safe_nmap_token, is_semi_interactive_tty_request
 
 _NUM = re.compile(r"^[-+]?\d+$")
@@ -77,7 +84,7 @@ def _wifi_scan() -> str:
         return f"wifi_scan (nmcli) — {len(lines)} rows\n" + "\n".join(lines)
     return (
         "wifi_scan: nmcli not found. On Kali desktop, install `network-manager` and ensure "
-        "wireless is managed (or use a NetHunter device with the Anubis built-in wifi_scan)."
+        "wireless is managed (or use a NetHunter device with the Kaliyai built-in wifi_scan)."
     )
 
 
@@ -184,9 +191,23 @@ def _gvm_info() -> str:
     s = _SETTINGS
     gvmc = shutil.which("gvm-cli")
     has_ca = bool(s.gmp_cafile) and os.path.isfile(s.gmp_cafile)
+    gvm_usr = "n/a"
+    try:
+        import pwd
+
+        try:
+            pwd.getpwnam("_gvm")
+            gvm_usr = "yes"
+        except KeyError:
+            gvm_usr = "no"
+    except ImportError:
+        gvm_usr = "n/a"
     return (
         "gvm_info (GMP / Greenbone in kali-mcp)\n"
         f"  gvm-cli binary: {gvmc or '(not in PATH — in Codespace: apt install gvm-cli; restart shell)'}\n"
+        f"  euid: {os.geteuid()}  system user _gvm: {gvm_usr}  desktop gvm via runuser: {gvm_runuser_will_apply()}\n"
+        f"  KALI_MCP_GVM_RUN_AS_GVM: {os.environ.get('KALI_MCP_GVM_RUN_AS_GVM', 'auto')!r} "
+        "(auto=run as _gvm when euid=0; 0=plain gvm-cli; 1=prefer runuser if _gvm exists)\n"
         f"  defaults: host {s.gmp_host} port {s.gmp_port}  user {s.gmp_username}\n"
         f"  GMP password from env: "
         f"{'yes (KALI_MCP_GMP_PASSWORD or GMP_PASSWORD); pass gmp_password in gvm_cli to override' if s.gmp_default_password else 'no — set KALI_MCP_GMP_PASSWORD or gmp_password in the tool call'}\n"
@@ -348,7 +369,7 @@ def call_tool(name: str, raw: Any) -> dict:
     return mcp_err(f"unknown tool: {name}")
 
 
-# Tool definitions: JSON Schemas (subset matching Anubis)
+# Tool definitions: JSON Schemas (subset matching Kaliyai)
 def tool_catalog_for_settings(s: Settings) -> list[dict[str, Any]]:
     tools: list[dict[str, Any]] = [
         {
@@ -372,7 +393,7 @@ def tool_catalog_for_settings(s: Settings) -> list[dict[str, Any]]:
         },
         {
             "name": "wifi_scan",
-            "description": "List Wi-Fi (nmcli on Kali desktop; for Android use Anubis built-in wifi_scan).",
+            "description": "List Wi-Fi (nmcli on Kali desktop; for Android use Kaliyai built-in wifi_scan).",
             "inputSchema": {"type": "object", "properties": {}},
         },
         {

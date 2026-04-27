@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "kali-mcp"
 version = "0.1.0"
-description = "MCP (JSON-RPC) HTTP server for Kali Linux desktop and NetHunter: nmap, gvm-cli, wifi scan, and optional chroot exec (Anubis-compatible tools)."
+description = "MCP (JSON-RPC) HTTP server for Kali Linux desktop and NetHunter: nmap, gvm-cli, wifi scan, and optional chroot exec (Kaliyai-compatible tools)."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
@@ -14,5 +14,21 @@ dependencies = [
   "uvicorn[standard]>=0.29.0",
 ]
 
+[project.optional-dependencies]
+copilot = [
+  "mcp>=1.8.0",
+]
+book = [
+  "IPython>=8.0.0",
+  "jupyter-book>=0.15.0,<2.0.0",
+  "jupyterlab>=4.0.0",
+  "jupyter-ai>=2.0.0",
+  "github-copilot-sdk",
+  "nest-asyncio>=1.5.0",
+  "ipykernel>=6.0.0",
+]
+
 [project.scripts]
 kali-mcp = "kali_mcp.__main__:main"
+kali-mcp-stdio = "kali_mcp.copilot_stdio:main"
+kali-mcp-stdio-lite = "kali_mcp.copilot_stdio_lite:main"

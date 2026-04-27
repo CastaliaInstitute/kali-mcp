@@ -1,0 +1,23 @@
+# Local pentest / security lab: isolated Docker network + intentional training app.
+# Start from repo root:  ./scripts/lab-up.sh
+# For educators and students: use only in environments you are allowed to test.
+name: kali-mcp-lab
+networks:
+  student_lab:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24
+
+# OWASP Juice Shop: deliberately vulnerable web app (training only)
+# See: https://owasp.org/www-project-juice-shop/
+services:
+  juice_shop:
+    image: bkimminich/juice-shop:latest
+    container_name: kali-mcp-lab-juice-shop
+    networks:
+      student_lab:
+        ipv4_address: 172.30.0.10
+    ports:
+      - "127.0.0.1:3000:3000"
+    restart: "no"

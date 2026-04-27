@@ -9,16 +9,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
     KALI_MCP_PORT=8765 \
     KALI_MCP_PROFILE=desktop
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates curl \
-    iproute2 \
-    python3-pip \
-    python3-venv \
-    nmap nmap-common \
-    network-manager \
-    dnsutils \
-    && (apt-get install -y exploitdb || true) \
-    && rm -rf /var/lib/apt/lists/*
+COPY scripts/install-kali-mcp-prereqs.sh /tmp/install-kali-mcp-prereqs.sh
+RUN bash /tmp/install-kali-mcp-prereqs.sh && rm -f /tmp/install-kali-mcp-prereqs.sh
 
 WORKDIR /app
 COPY pyproject.toml README.md LICENSE /app/

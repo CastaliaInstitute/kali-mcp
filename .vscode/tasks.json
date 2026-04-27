@@ -2,17 +2,85 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
+			"label": "pentest book: jupyter-book build",
+			"type": "shell",
+			"command": "bash -lc 'test -d .venv && . .venv/bin/activate; jupyter-book build pentest-book'",
+			"options": { "cwd": "${workspaceFolder}" },
+			"group": "build"
+		},
+		{
+			"label": "pentest book: Thebe static server (build + http.server)",
+			"detail": "Serves pentest-book/_build/html (default port 8788, env JUPYTER_BOOK_THEBE_PORT). Thebe needs http not file. Kernels: MyBinder. Stop with the trash icon on the terminal / Ctrl+C.",
+			"type": "shell",
+			"command": "bash -lc 'test -d .venv && . .venv/bin/activate; exec bash scripts/jupyter-book-thebe-serve.sh'",
+			"options": { "cwd": "${workspaceFolder}" },
+			"isBackground": true,
+			"problemMatcher": {
+				"owner": "thebe-http",
+				"pattern": { "regexp": "^(.*)$" },
+				"background": {
+					"activeOnStart": true,
+					"beginsPattern": "Running Jupyter-Book",
+					"endsPattern": "Serving HTTP on"
+				}
+			}
+		},
+		{
+			"label": "pentest book: Thebe static server (serve only, no build)",
+			"detail": "Faster re-run if _build is already up to date. Same port env as the build+serve task.",
+			"type": "shell",
+			"command": "bash -lc 'test -d .venv && . .venv/bin/activate; JUPYTER_BOOK_BUILD=0 JUPYTER_BOOK_THEBE_PORT=\"${JUPYTER_BOOK_THEBE_PORT:-8788}\" exec bash scripts/jupyter-book-thebe-serve.sh'",
+			"options": { "cwd": "${workspaceFolder}" },
+			"isBackground": true,
+			"problemMatcher": {
+				"owner": "thebe-http-2",
+				"pattern": { "regexp": "^(.*)$" },
+				"background": {
+					"activeOnStart": true,
+					"beginsPattern": "Thebe / book preview",
+					"endsPattern": "Serving HTTP on"
+				}
+			}
+		},
+		{
+			"label": "pentest book: open in editor (content/intro.md)",
+			"detail": "Focuses the Jupyter Book intro in the editor instead of README. Runs on folder open once you trust the workspace; disable via Settings → `task allow automatic tasks` if needed.",
+			"type": "shell",
+			"command": "bash -lc 'exec bash \"${workspaceFolder}/scripts/vscode-open-pentest-book.sh\" \"${workspaceFolder}/pentest-book/content/intro.md\"'",
+			"options": { "cwd": "${workspaceFolder}" },
+			"runOptions": { "runOn": "folderOpen" }
+		},
+		{
+			"label": "pentest book: open Thebe site in system browser (localhost:8788)",
+			"detail": "Start the Thebe static server first. Uses default browser.",
+			"type": "shell",
+			"command": "python3 -c 'import webbrowser; webbrowser.open(\"http://127.0.0.1:8788/\")'",
+			"options": { "cwd": "${workspaceFolder}" }
+		},
+		{
 			"label": "kali-mcp: run server (8765)",
 			"type": "shell",
 			"command": "bash -lc 'test -d .venv && . .venv/bin/activate; export KALI_MCP_HOST=0.0.0.0 KALI_MCP_PORT=8765; exec kali-mcp'",
 			"options": { "cwd": "${workspaceFolder}" }
 		},
 		{
-			"label": "kali-mcp: test JSON-RPC (Anubis-style smoke)",
+			"label": "kali-mcp: test JSON-RPC (Kaliyai-style smoke)",
 			"type": "shell",
 			"command": "bash -lc 'test -d .venv && . .venv/bin/activate; KALI_MCP_TEST_URL=${KALI_MCP_TEST_URL:-http://127.0.0.1:8765/} python3 scripts/test_mcp_jsonrpc.py'",
 			"options": { "cwd": "${workspaceFolder}" },
 			"group": { "kind": "test", "isDefault": true }
+		},
+		{
+			"label": "lab: up (Docker pentest training stack)",
+			"type": "shell",
+			"command": "bash -lc 'bash scripts/lab-up.sh'",
+			"options": { "cwd": "${workspaceFolder}" }
+		},
+		{
+			"label": "lab: down",
+			"type": "shell",
+			"command": "bash -lc 'bash scripts/lab-down.sh'",
+			"options": { "cwd": "${workspaceFolder}" }
 		}
 	]
 }

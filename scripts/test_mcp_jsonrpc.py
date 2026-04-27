@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Exercise kali-mcp the same way Anubis (McpClient) does: JSON-RPC over HTTP.
+Exercise kali-mcp the same way Kaliyai (McpClient) does: JSON-RPC over HTTP.
 Run:  python3 scripts/test_mcp_jsonrpc.py
 With:  KALI_MCP_TEST_URL=http://127.0.0.1:8765/  (kali-mcp must be running)
 """

@@ -1,4 +1,5 @@
 import os
+import pwd
 import re
 import shlex
 import shutil
@@ -45,6 +46,48 @@ def is_safe_abs_path(p: str) -> bool:
         if c in p:
             return False
     return True
+
+
+def _runuser_path() -> str | None:
+    for p in ("/usr/sbin/runuser", "/sbin/runuser"):
+        if Path(p).is_file():
+            return p
+    return None
+
+
+def _gvm_system_user_exists() -> bool:
+    try:
+        pwd.getpwnam("_gvm")
+    except KeyError:
+        return False
+    return True
+
+
+def gvm_runuser_will_apply() -> bool:
+    """True if desktop gvm_cli will execute via `runuser -u _gvm` (used by gvm_info)."""
+    return _gvm_use_runuser_desktop()
+
+
+def _gvm_use_runuser_desktop() -> bool:
+    """
+    gvm-cli on Kali/Debian often must run as the _gvm user to read /var/lib/gvm/ (certs, etc.).
+    The NetHunter code path already uses `runuser -u _gvm`. Desktop (e.g. Codespace as root)
+    used a bare gvm-cli and could hit "Permission denied". When root + _gvm + runuser exist,
+    use the same wrapper. Set KALI_MCP_GVM_RUN_AS_GVM=0 to force a plain gvm-cli (e.g. remote
+    gmp-bridge on a host with no _gvm account).
+    """
+    if os.name != "posix":
+        return False
+    raw = (os.environ.get("KALI_MCP_GVM_RUN_AS_GVM") or "auto").lower().strip()
+    if raw in ("0", "false", "no", "off"):
+        return False
+    if not _gvm_system_user_exists() or _runuser_path() is None:
+        return False
+    if raw in ("1", "true", "yes", "on"):
+        return True
+    if raw not in ("auto", ""):
+        return False
+    return os.geteuid() == 0
 
 
 def _run_direct(line: str, timeout_sec: int) -> Outcome:
@@ -160,7 +203,7 @@ def gvm_cli_line(
     ca_file: str,
     s: Settings,
 ) -> str:
-    """Build one bash line. NetHunter: runuser in chroot. Desktop: gvm-cli in PATH (often run the server as root or gvm)."""
+    """Build one bash line. NetHunter: runuser in chroot. Desktop: gvm-cli; may wrap runuser -u _gvm."""
     tls = (
         f"tls --hostname {sh_quote(host)} --port {port} --insecure"
         if s.gmp_tls_insecure
@@ -171,10 +214,17 @@ def gvm_cli_line(
         f"{tls} "
         f"-X {sh_quote(gmp_xml)} --pretty"
     )
+    runu = _runuser_path() or "/usr/sbin/runuser"
     if s.profile == Profile.nethunter:
         return (
             f"export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin; "
             f"export HOME=/var/lib/gvm; "
-            f"/usr/sbin/runuser -u _gvm -- {inner}"
+            f"{runu} -u _gvm -- {inner}"
+        )
+    if _gvm_use_runuser_desktop():
+        return (
+            f"export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin; "
+            f"export HOME=/var/lib/gvm; "
+            f"{runu} -u _gvm -- {inner}"
         )
     return inner

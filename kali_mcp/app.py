@@ -64,7 +64,7 @@ async def mcp_entry(request) -> JSONResponse:  # type: ignore[no-untyped-def]
                 {
                     "service": "kali-mcp",
                     "protocol": "JSON-RPC over HTTP (Mcp-Protocol-Version: 2024-11-05)\n"
-                    "compatible with the Anubis (nethunter-gemini-mcp) McpClient",
+                    "compatible with the Kaliyai (nethunter-gemini-mcp) McpClient",
                 }
             )
         from starlette.responses import Response

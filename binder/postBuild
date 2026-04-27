@@ -1,0 +1,5 @@
+#!/bin/bash
+set -euxo pipefail
+# MyBinder: repo2docker working directory = repository root
+python -m pip install --upgrade pip
+python -m pip install ".[book]"

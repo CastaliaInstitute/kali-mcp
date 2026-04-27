@@ -1,4 +1,4 @@
-# Shared with Anubis (kali_nethunter_list_tools). Extend freely.
+# Shared with Kaliyai (kali_nethunter_list_tools). Extend freely.
 # minimal + common Kali tools
 nmap
 msfvenom

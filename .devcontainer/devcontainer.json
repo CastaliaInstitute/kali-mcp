@@ -2,17 +2,40 @@
 	"name": "Kali (kali-mcp)",
 	"image": "kalilinux/kali-rolling",
 	"remoteUser": "root",
-	"features": {},
-	"onCreateCommand": "bash -c 'set -e; export DEBIAN_FRONTEND=noninteractive; apt-get update; apt-get install -y --no-install-recommends ca-certificates curl iproute2 python3-pip python3-venv nmap nmap-common network-manager dnsutils; apt-get install -y gvm-cli || apt-get install -y gvm-tools || true; apt-get install -y exploitdb || true'",
-	"postCreateCommand": "python3 -m venv .venv && . .venv/bin/activate && pip install -U pip setuptools wheel && pip install -e .",
-	"postStartCommand": "test -f .venv/bin/kali-mcp && echo 'kali-mcp:  source .venv/bin/activate && ./scripts/codespace-kali-mcp.sh  (applies .devcontainer/gmp.env for GMP).  Or: kali-mcp.  gvm_info / gvm_cli = Greenbone. Port 8765 is forwarded; see README GVM section.'",
+	"hostRequirements": {
+		"cpus": 4,
+		"memory": "8gb"
+	},
+	"features": {
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {
+			"version": "latest",
+			"dockerDashComposeVersion": "v2"
+		},
+		"ghcr.io/devcontainers/features/github-cli:1": {
+			"version": "latest"
+		}
+	},
+	"onCreateCommand": "bash scripts/install-kali-mcp-prereqs.sh",
+	"postCreateCommand": "bash .devcontainer/post-create.sh",
+	"postStartCommand": "bash .devcontainer/post-start.sh",
 	"portsAttributes": {
-		"8765": { "label": "kali-mcp HTTP", "onAutoForward": "notify" }
+		"8765": {
+			"label": "kali-mcp (JSON-RPC / Kaliyai HTTP)",
+			"onAutoForward": "notify",
+			"visibility": "public"
+		}
 	},
 	"forwardPorts": [8765],
 	"customizations": {
 		"vscode": {
-			"settings": { "python.defaultInterpreterPath": "${containerWorkspaceFolder}/.venv/bin/python" }
+			"extensions": [
+				"GitHub.copilot",
+				"GitHub.copilot-chat"
+			],
+			"settings": {
+				"python.defaultInterpreterPath": "${containerWorkspaceFolder}/.venv/bin/python",
+				"chat.mcp.autostart": false
+			}
 		}
 	},
 	"containerEnv": {

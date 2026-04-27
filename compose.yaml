@@ -1,5 +1,5 @@
 # Local / VM: docker compose up --build
-# Anubis: set MCP URL to http://<host>:8765/ (same as bare metal)
+# Kaliyai: set MCP URL to http://<host>:8765/ (same as bare metal)
 services:
   kali-mcp:
     build: .

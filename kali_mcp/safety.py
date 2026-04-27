@@ -1,4 +1,4 @@
-"""Nmap, GMP XML, and TUI heuristics (ported from Anubis / BuiltinMcpEngine)."""
+"""Nmap, GMP XML, and TUI heuristics (ported from Kaliyai / BuiltinMcpEngine)."""
 
 GMP_DANGEROUS = (
     "<create_",
