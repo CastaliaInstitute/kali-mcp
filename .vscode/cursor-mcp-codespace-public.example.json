@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "kaliMcpCodespace": {
+      "url": "https://YOUR-SUBDOMAIN-8765.app.github.dev/mcp"
+    }
+  }
+}

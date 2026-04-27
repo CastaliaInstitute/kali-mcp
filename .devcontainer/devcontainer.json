@@ -28,12 +28,23 @@
 	"forwardPorts": [8765],
 	"customizations": {
 		"vscode": {
+			"mcp": {
+				"servers": {
+					"kaliMcpHttp": {
+						"type": "http",
+						"url": "http://127.0.0.1:8765/mcp"
+					}
+				}
+			},
 			"extensions": [
 				"GitHub.copilot",
 				"GitHub.copilot-chat"
 			],
 			"settings": {
 				"python.defaultInterpreterPath": "${containerWorkspaceFolder}/.venv/bin/python",
+				"chat.mcp.autostart": true,
+				"chat.mcp.autoStart": "newAndOutdated",
+				"chat.mcp.apps.enabled": true,
 				"chat.tools.terminal.enforceTimeoutFromModel": false
 			}
 		}
