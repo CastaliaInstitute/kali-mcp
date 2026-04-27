@@ -9,7 +9,8 @@
 	"features": {
 		"ghcr.io/devcontainers/features/docker-in-docker:2": {
 			"version": "latest",
-			"dockerDashComposeVersion": "v2"
+			"dockerDashComposeVersion": "v2",
+			"moby": false
 		},
 		"ghcr.io/devcontainers/features/github-cli:1": {
 			"version": "latest"
