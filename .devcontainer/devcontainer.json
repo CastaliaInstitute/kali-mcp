@@ -42,10 +42,11 @@
 			],
 			"settings": {
 				"python.defaultInterpreterPath": "${containerWorkspaceFolder}/.venv/bin/python",
-				"chat.mcp.autostart": true,
+				"chat.mcp.autostart": "always",
 				"chat.mcp.autoStart": "newAndOutdated",
 				"chat.mcp.apps.enabled": true,
-				"chat.tools.terminal.enforceTimeoutFromModel": false
+				"chat.tools.terminal.enforceTimeoutFromModel": false,
+				"chat.extensionUnification.enabled": false
 			}
 		}
 	},
